@@ -1,0 +1,10 @@
+{
+	"id": "digital-life",
+	"name": "数字人生",
+	"version": "1.0.0",
+	"minAppVersion": "1.0.0",
+	"description": "一个强大的数据可视化仪表盘插件。支持多看板管理、拖拽布局、Markdown 统计图表、待办聚合及双链数据挖掘。",
+	"author": "Jinx",
+	"authorUrl": "",
+	"isDesktopOnly": false
+}

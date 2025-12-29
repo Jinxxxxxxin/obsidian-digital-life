@@ -1,0 +1,331 @@
+/* === FILE: styles.css === */
+
+/* --- 1. 基础结构 (Layout) --- */
+.dl-main-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-family: var(--font-interface);
+}
+
+.dl-body-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+}
+
+/* Sidebar */
+.dl-sidebar {
+    width: 250px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-secondary);
+    border-right: 1px solid var(--background-modifier-border);
+    transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.dl-sidebar.is-collapsed { width: 0; overflow: hidden; border-right: none; }
+
+.dl-sidebar-header {
+    padding: 0 12px; height: 40px; display: flex; align-items: center; justify-content: space-between;
+    font-weight: 600; border-bottom: 1px solid var(--background-modifier-border); color: var(--text-muted); font-size: 0.9em;
+}
+
+.dl-dashboard-list {
+    flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 2px;
+}
+
+.dl-dashboard-item {
+    padding: 6px 12px; border-radius: var(--radius-s); cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    color: var(--text-muted); transition: all 0.2s ease; user-select: none; gap: 8px; margin-bottom: 2px;
+}
+
+.dl-dashboard-item:hover { background-color: var(--background-modifier-hover); color: var(--text-normal); }
+.dl-dashboard-item.is-active { background-color: var(--interactive-accent); color: var(--text-on-accent); font-weight: 500; }
+.dl-dashboard-item.is-active .dl-item-icon { color: var(--text-on-accent); }
+.dl-dashboard-item.is-dragging { opacity: 0.5; background-color: var(--background-modifier-hover); }
+
+.dl-sidebar-footer { padding: 10px; border-top: 1px solid var(--background-modifier-border); display: flex; justify-content: flex-end; }
+
+/* Header */
+.dl-header {
+    height: 50px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; border-bottom: 1px solid var(--background-modifier-border);
+    background-color: var(--background-primary); z-index: 10; flex-shrink: 0;
+}
+
+.dl-header-left, .dl-header-right, .dl-btn-group, .dl-widget-controls { display: flex; align-items: center; gap: 8px; }
+
+.dl-header-btn {
+    display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radius-s);
+    cursor: pointer; font-size: 0.9em; color: var(--text-muted); transition: all 0.2s ease;
+}
+.dl-header-btn:hover { background-color: var(--background-modifier-hover); color: var(--text-normal); }
+.dl-header-btn.is-active { background-color: var(--interactive-accent); color: var(--text-on-accent); }
+
+.dl-search-box {
+    width: 240px; height: 30px; border-radius: 15px; padding-left: 12px;
+    background-color: var(--background-modifier-form-field); border: 1px solid transparent;
+}
+.dl-search-box:focus { border-color: var(--interactive-accent); background-color: var(--background-primary); }
+
+/* --- 2. 网格布局与交互 (Grid & Interaction) --- */
+.dl-content-area { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
+.dl-grid-canvas-container { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px; background-color: var(--background-primary); }
+
+.dl-grid-canvas {
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
+    grid-auto-rows: 50px;
+    gap: 16px;
+    min-height: 100%;
+    padding-bottom: 100px;
+    position: relative; 
+}
+
+.dl-grid-canvas.is-editing {
+    background-image: linear-gradient(var(--background-modifier-border) 1px, transparent 1px), linear-gradient(90deg, var(--background-modifier-border) 1px, transparent 1px);
+    background-size: calc((100% - 23 * 16px) / 24 + 16px) 66px;
+    background-position: -1px -1px;
+}
+
+.dl-grid-item-wrapper {
+    background-color: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: box-shadow 0.2s ease, border-color 0.2s;
+}
+
+.dl-grid-item-wrapper:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+/* 编辑模式下显示虚线框和移动光标 */
+.dl-grid-canvas.is-editing .dl-grid-item-wrapper {
+    border: 1px dashed var(--text-muted);
+    cursor: move;
+}
+
+/* 调整大小手柄 */
+.dl-resize-handle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    cursor: nwse-resize;
+    display: none;
+    z-index: 50; 
+}
+
+.dl-grid-canvas.is-editing .dl-resize-handle { display: block; }
+
+.dl-resize-handle::after {
+    content: '';
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 10px 10px;
+    border-color: transparent transparent var(--interactive-accent) transparent;
+}
+
+/* --- 3. 组件通用样式 (Widget Common) --- */
+.dl-widget-card { height: 100%; width: 100%; display: flex; flex-direction: column; min-height: 0; }
+
+.dl-widget-header {
+    padding: 0 12px; height: 40px; border-bottom: 1px solid var(--background-modifier-border);
+    display: flex; justify-content: space-between; align-items: center;
+    background-color: var(--background-secondary-alt); flex-shrink: 0;
+}
+
+.dl-widget-title { font-weight: 600; font-size: 0.9em; color: var(--text-normal); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl-widget-controls { opacity: 0; transition: opacity 0.2s ease; }
+.dl-grid-item-wrapper:hover .dl-widget-controls { opacity: 1; }
+
+.dl-widget-content {
+    flex: 1; padding: 0; 
+    overflow: hidden; position: relative; background-color: var(--background-primary);
+    display: flex; flex-direction: column;
+}
+
+.dl-icon-btn {
+    padding: 4px; border-radius: var(--radius-s); cursor: pointer; color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center; width: 24px; height: 24px;
+}
+.dl-icon-btn:hover { background-color: var(--background-modifier-hover); color: var(--text-normal); }
+
+/* --- 4. 特定组件样式 (Widget Specific) --- */
+
+/* Charts */
+.dl-chart-wrapper { 
+    flex: 1; width: 100%; height: 100%; min-height: 0; 
+    position: relative; 
+    overflow: hidden; /* 关键：配合 GitLine 缩放 */
+}
+.dl-chart-text { font-size: 10px; fill: var(--text-muted); pointer-events: none; }
+.dl-chart-legend-container { padding: 8px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; font-size: 0.8em; color: var(--text-muted); }
+
+/* GitLine Styles */
+.dl-gitline-container {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    overflow: hidden;
+}
+.dl-gitline-container:active { cursor: grabbing; }
+
+.dl-git-reset-btn {
+    position: absolute; bottom: 10px; right: 10px;
+    padding: 4px 8px; background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px; font-size: 12px; cursor: pointer;
+    opacity: 0.8; z-index: 10;
+}
+.dl-git-reset-btn:hover { opacity: 1; background: var(--background-modifier-hover); }
+
+.dl-axis-line { stroke: var(--text-muted); stroke-width: 2px; }
+.dl-axis-text { font-size: 10px; fill: var(--text-muted); user-select: none; }
+.dl-git-branch { fill: none; stroke-width: 2px; stroke-linecap: round; stroke-linejoin: round; }
+.dl-git-node { stroke-width: 2px; fill: var(--background-primary); }
+.dl-git-node.completed { fill: currentColor; }
+.dl-git-extension { stroke-dasharray: 4, 4; opacity: 0.5; }
+
+/* List Widget */
+.dl-list-widget-container { overflow-y: auto; height: 100%; }
+.dl-list-items { list-style: none; padding: 0; margin: 0; }
+.dl-list-item {
+    padding: 10px 14px; border-bottom: 1px solid var(--background-modifier-border); cursor: pointer;
+    display: flex; gap: 12px; align-items: center; font-size: 0.9em; transition: background 0.1s;
+}
+.dl-list-item:hover { background-color: var(--background-modifier-hover); }
+.dl-list-item:last-child { border-bottom: none; }
+.dl-list-item-icon { color: var(--text-muted); display: flex; align-items: center; }
+.dl-list-item-info { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.dl-list-item-title { font-weight: 500; color: var(--text-normal); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl-list-item-meta { font-size: 0.8em; color: var(--text-muted); margin-top: 2px; }
+
+/* Todo Widget */
+.dl-todo-widget-container { display: flex; flex-direction: column; height: 100%; }
+.dl-todo-list { flex: 1; overflow-y: auto; padding: 0; }
+.dl-todo-item {
+    display: flex; align-items: flex-start; gap: 10px; padding: 8px 14px;
+    border-bottom: 1px solid var(--background-modifier-border); transition: all 0.2s ease;
+    font-size: 0.9em;
+}
+.dl-todo-item:hover { background-color: var(--background-modifier-hover); }
+.dl-todo-text { flex: 1; word-break: break-all; line-height: 1.4; margin-top: 1px; }
+.dl-todo-text.is-completed { text-decoration: line-through; color: var(--text-muted); }
+.dl-todo-link { opacity: 0; transition: opacity 0.2s; }
+.dl-todo-item:hover .dl-todo-link { opacity: 1; }
+
+.dl-todo-group-header {
+    padding: 6px 12px; background-color: var(--background-secondary);
+    border-bottom: 1px solid var(--background-modifier-border); margin-top: 4px;
+}
+.dl-priority-badge {
+    font-size: 0.65em; padding: 1px 4px; border-radius: 4px; font-weight: 600;
+    text-transform: uppercase; border: 1px solid currentColor;
+}
+.dl-priority-badge[data-priority="high"] { color: var(--text-error); background-color: rgba(var(--color-red-rgb), 0.1); }
+.dl-priority-badge[data-priority="medium"] { color: var(--text-warning); background-color: rgba(var(--color-orange-rgb), 0.1); }
+.dl-priority-badge[data-priority="low"] { color: var(--text-success); background-color: rgba(var(--color-green-rgb), 0.1); }
+.dl-todo-meta-line { font-size: 0.75em; color: var(--text-faint); margin-top: 2px; }
+.dl-date-overdue { color: var(--text-error); font-weight: bold; }
+.dl-todo-content { min-width: 0; }
+
+/* Markdown Widget */
+.dl-markdown-widget-container { height: 100%; overflow: hidden; display: flex; flex-direction: column; }
+.dl-markdown-preview { padding: 16px; overflow-y: auto; flex: 1; user-select: text; cursor: auto; }
+.dl-markdown-editor-wrapper { display: flex; flex-direction: column; flex: 1; position: relative; background-color: var(--background-primary); }
+.dl-markdown-editor {
+    flex: 1; width: 100%; resize: none; border: none; padding: 16px;
+    font-family: var(--font-monospace); font-size: var(--font-text); line-height: var(--line-height-normal);
+    background: transparent; color: var(--text-normal); outline: none; box-shadow: none;
+}
+.dl-markdown-preview::-webkit-scrollbar, .dl-markdown-editor::-webkit-scrollbar { width: 8px; height: 8px; background-color: transparent; }
+.dl-markdown-preview::-webkit-scrollbar-thumb, .dl-markdown-editor::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb-bg); border-radius: 4px; }
+
+/* --- 5. 模态框与配置 (Modals & Configs) --- */
+.dl-no-data, .dl-error-msg { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); padding: 20px; text-align: center; }
+.dl-error-msg { color: var(--text-error); }
+
+.dl-tooltip {
+    position: fixed; background: var(--background-primary); border: 1px solid var(--background-modifier-border);
+    padding: 8px; border-radius: 4px; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 12px; pointer-events: none;
+}
+
+.dl-config-container { box-sizing: border-box; }
+
+.dl-y-axis-switches {
+    display: flex; align-items: center; gap: 15px; margin-bottom: 10px;
+    padding: 8px; background-color: var(--background-secondary); border-radius: 4px;
+}
+
+/* --- 6. 移动端适配 (Mobile Adaptations) --- */
+.is-mobile .dl-grid-canvas {
+    display: flex !important; flex-direction: column !important; grid-template-columns: none !important;
+    gap: 16px !important; padding: 16px !important; height: auto !important; padding-bottom: 80px !important;
+    background-image: none !important;
+}
+.is-mobile .dl-grid-item-wrapper {
+    width: 100% !important; min-height: 320px !important; height: 320px !important;
+    grid-column: auto !important; grid-row: auto !important; position: relative !important;
+    left: auto !important; top: auto !important; transform: none !important; margin: 0 !important; flex-shrink: 0 !important;
+}
+.is-mobile .dl-grid-item-wrapper:has(.dl-list-widget-container),
+.is-mobile .dl-grid-item-wrapper:has(.dl-todo-widget-container) { height: 400px !important; }
+.is-mobile .dl-resize-handle { display: none !important; }
+.is-mobile .dl-sidebar { 
+    position: absolute; top: 0; left: 0; height: 100%; width: 85%; max-width: 300px; 
+    box-shadow: 10px 0 30px rgba(0,0,0,0.2); 
+    z-index: 1000;
+}
+
+/* 遮罩层样式 */
+.dl-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    transition: opacity 0.3s ease;
+    pointer-events: auto;
+}
+
+.dl-overlay.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.is-mobile .dl-widget-controls { opacity: 1 !important; }
+.is-mobile .dl-header { padding: 0 10px; }
+.is-mobile .dl-search-box { width: 120px; }
+
+/* 确保侧边栏在移动端正确过渡 */
+.is-mobile .dl-sidebar.is-collapsed {
+    transform: translateX(-100%);
+    width: 85%;
+}
+
+.is-mobile .dl-sidebar {
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
